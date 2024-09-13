@@ -1,0 +1,67 @@
+Enter a text file: MyFile.txt
+Total words: 80
+
+Word frequency:
+in: 1
+de: 7
+stille: 1
+ochtendmist: 1
+wandelde: 1
+ik: 2
+langs: 1
+kronkelende: 1
+rivieroever: 1
+waar: 1
+het: 5
+zachte: 1
+gekabbel: 1
+van: 3
+water: 1
+mijn: 1
+gedachten: 1
+wiegde: 1
+zon: 1
+begon: 1
+langzaam: 1
+op: 1
+te: 3
+komen: 1
+haar: 1
+eerste: 1
+stralen: 1
+doorbraken: 1
+nevel: 1
+en: 2
+verwarmden: 1
+aarde: 1
+bos: 1
+om: 1
+me: 2
+heen: 1
+ontwaakte: 1
+gevuld: 1
+met: 2
+gezang: 1
+vogels: 1
+die: 1
+begonnen: 1
+fluiten: 1
+was: 1
+een: 2
+magische: 1
+ochtend: 1
+waarin: 1
+wereld: 1
+zichzelf: 1
+leek: 1
+vernieuwen: 1
+voelde: 1
+Ò®Ò®n: 1
+natuur: 1
+nietig: 1
+deel: 1
+dit: 1
+uitgestrekte: 1
+universum: 1
+
+Total sentences: 4
