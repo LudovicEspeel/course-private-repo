@@ -1,0 +1,1 @@
+This code example should be refactored using inheritance and polymorphism. Avoid code duplication as much as possible!
