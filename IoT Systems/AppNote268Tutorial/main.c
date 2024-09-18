@@ -22,6 +22,8 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "Driver_USART.h" // CMSIS Driver:USART
+#include <stdio.h>
 
 #ifdef _RTE_
 #include "RTE_Components.h"             // Component selection
@@ -78,6 +80,8 @@ HAL_StatusTypeDef HAL_InitTick(uint32_t TickPriority) {
 static void SystemClock_Config(void);
 static void Error_Handler(void);
 extern int Init_Thread(void);
+extern ARM_DRIVER_USART Driver_USART1;
+void Initialize_USART(void);
 
 /* Private functions ---------------------------------------------------------*/
 
@@ -106,11 +110,19 @@ int main(void)
 
   /* Add your application code here
      */
+	Initialize_USART();
 	Init_Thread();
 
 #ifdef RTE_CMSIS_RTOS2
   /* Initialize CMSIS-RTOS2 */
   osKernelInitialize ();
+	HAL_Delay(1000);
+	
+	uint8_t fbuf[50] = { 0 };
+	printf("Hello Vives!\r\n");
+	printf("Give your name:\r\n");
+	scanf("%s",fbuf);
+	printf("\nYour name is %s\r\n",fbuf);
 
   /* Create thread functions that start executing, 
   Example: osThreadNew(app_main, NULL, NULL); */
@@ -232,7 +244,24 @@ void assert_failed(uint8_t* file, uint32_t line)
 /**
   * @}
   */ 
-
+void Initialize_USART(void)
+{
+	static ARM_DRIVER_USART * USARTdrv = &Driver_USART1;
+	
+	/* Initialize the USART driver */
+	USARTdrv->Initialize(0);
+	
+	/*Power up the USART peripheral */
+	USARTdrv->PowerControl(ARM_POWER_FULL);
+	
+	/*Configure the USART to 115200 Bits/sec */
+	USARTdrv->Control(ARM_USART_MODE_ASYNCHRONOUS | ARM_USART_DATA_BITS_8 | ARM_USART_PARITY_NONE |
+	ARM_USART_STOP_BITS_1 | ARM_USART_FLOW_CONTROL_NONE, 115200);
+	
+	/* Enable Receiver and Transmitter lines */
+	USARTdrv->Control (ARM_USART_CONTROL_TX, 1);
+	USARTdrv->Control (ARM_USART_CONTROL_RX, 1);
+}
 /**
   * @}
   */ 
