@@ -120,9 +120,9 @@ int main(void)
 	
 	uint8_t fbuf[50] = { 0 };
 	printf("Hello Vives!\r\n");
-	printf("Give your name:\r\n");
-	scanf("%s",fbuf);
-	printf("\nYour name is %s\r\n",fbuf);
+	//printf("Give your name:\r\n");
+	//scanf("%s",fbuf);
+	//printf("\nYour name is %s\r\n",fbuf);
 
   /* Create thread functions that start executing, 
   Example: osThreadNew(app_main, NULL, NULL); */
