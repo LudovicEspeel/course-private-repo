@@ -37,8 +37,8 @@ void Thread (void *argument) {
 	BSP_SDRAM_Init();
 	Init_GUIThread();
 	
-	fbuf[0] = 'H';
-	fbuf[1] = 'i';
+	//fbuf[0] = 'H';
+	//fbuf[1] = 'i';
 
 	
   while (1) {
