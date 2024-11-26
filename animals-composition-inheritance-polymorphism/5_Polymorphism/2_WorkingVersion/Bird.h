@@ -15,8 +15,6 @@ namespace AnimalTree
         string getString() const override;
 
     private:
-        string name;
-        string food;
         int numberOfLegs;
         int numberOfWings;
     };
