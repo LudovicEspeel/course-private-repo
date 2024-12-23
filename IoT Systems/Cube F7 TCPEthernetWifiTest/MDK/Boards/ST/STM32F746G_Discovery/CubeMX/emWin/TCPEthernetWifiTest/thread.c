@@ -16,8 +16,10 @@
 #include "usart6.h"
 #endif
 
+#ifdef TIMER6
 extern TIM_HandleTypeDef htim6;		 // declared in main.c
 extern uint8_t timerPeriodIsElapsed; // declared in main.c
+#endif
 extern void Init_GUIThread(void);
 
 #ifdef WIFI
@@ -29,13 +31,15 @@ enum UsartState usart6State = idle;
 uint8_t receivedUsart1Data = 0;
 uint8_t numberOfReceivedBytes = 0;
 char receivedText[CHAR_ARRAY_BUFFER_LENGTH];
+uint8_t sendWifiData = 0;
+uint8_t receivedWifiData = 0;
 #endif
 
 #ifdef ETHERNET
 char buffer[1024];
+uint8_t sendEthernetData = 0;
+uint8_t receivedEthernetData = 0;
 #endif
-
-uint8_t updateData;
 
 // Main stack size must be multiple of 8 Bytes
 #define APP_MAIN_STK_SZ (4096)
@@ -61,42 +65,54 @@ __NO_RETURN void app_main(void *argument)
 	HAL_TIM_Base_Start_IT(&htim6); // start timer6, interrupt is in main.c (HAL_TIM_PeriodElapsedCallback)
 #endif
 
+#ifdef WIFI
+	InitWifi();
+#endif
+	
 #ifdef ETHERNET
 	netInitialize(); // initialize ethernet interface
 	OpenTCPConnection();
 #endif
 
-#ifdef WIFI
-	InitWifi();
-#endif
-
 	while (1)
 	{
-		// TIMER6
+#ifdef TIMER6
 		if (timerPeriodIsElapsed == 1)
 		{
-			// SendTCPWifiMessage("Hello Wifi!", 11); //this works...
-
 			printf("Timer elapse 5 seconds\r\n");
 			timerPeriodIsElapsed = 0;
 		}
+#endif
 
 		// Preferably place as much of your code here as possible, instead of in GUI_SingleThread.
 		// The latter is more intended for configuring graphical settings.
 
 #ifdef ETHERNET
-		int32_t bytesReceived = ReceiveTCPMessage(buffer, 1024);
-		if (bytesReceived > 0)
+		if (sendEthernetData)
 		{
-			updateData = 1;
-			printf("Received: %s\r\n", buffer);
+			char message[] = "Hello TCP/IP!";
+			SendTCPMessage(message, strlen(message));
+			sendEthernetData = 0;
+
+			int32_t bytesReceived = ReceiveTCPMessage(buffer, 1024);
+			if (bytesReceived > 0)
+			{
+				receivedEthernetData = 1;
+				printf("Received: %s\r\n", buffer);
+			}
 		}
 #endif
 
 #ifdef WIFI
+		if (sendWifiData)
+		{
+			char message[] = "Hello Wifi TCP/IP!";
+			SendTCPWifiMessage(message, strlen(message));
+			sendWifiData = 0;
+		}
+
 		while (circularBuffer.numberOfStringsInBuffer > 0)
 		{
-
 			// Retrieve one string from the buffer.
 			circularBufferActionResult = PopStringFromCircularBuffer(&circularBuffer, receivedText);
 			if (circularBufferActionResult == READ_STRING_SUCCEEDED)
@@ -119,7 +135,7 @@ __NO_RETURN void app_main(void *argument)
 
 					// Print the received text for debugging purposes.
 					printf("Received: %s\r\n", receivedText);
-					updateData = 1;
+					receivedWifiData = 1;
 				}
 			}
 		}

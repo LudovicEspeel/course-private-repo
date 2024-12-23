@@ -33,4 +33,5 @@
   C:\Program\ Files\Keil_v5\Arm\Keil\STM32F7xx_DFP\2.16.0\Drivers\STM32F7xx_HAL_Driver\Inc\stm32f7xx_hal_tim_ex.h \
   C:\Program\ Files\Keil_v5\Arm\Keil\STM32F7xx_DFP\2.16.0\Drivers\STM32F7xx_HAL_Driver\Inc\stm32f7xx_hal_uart.h \
   C:\Program\ Files\Keil_v5\Arm\Keil\STM32F7xx_DFP\2.16.0\Drivers\STM32F7xx_HAL_Driver\Inc\stm32f7xx_hal_uart_ex.h \
-  C:\Program\ Files\Keil_v5\Arm\ARM\CMSIS\6.1.0\CMSIS\RTOS2\Include\cmsis_os2.h
+  C:\Program\ Files\Keil_v5\Arm\ARM\CMSIS\6.1.0\CMSIS\RTOS2\Include\cmsis_os2.h \
+  RTE\Device\STM32F746NGHx\STCubeGenerated\Src\..\..\..\..\..\settings.h

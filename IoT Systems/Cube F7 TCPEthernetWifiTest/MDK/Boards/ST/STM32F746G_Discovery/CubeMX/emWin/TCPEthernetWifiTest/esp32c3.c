@@ -46,7 +46,6 @@ void InitWifi()
 	// StringToUsart6("AT+CIPSTAMAC?\r\n");
 	// while(!LookForString1(&circularBuffer, "OK\r\n"));
 
-	// Connect to the WiFi network (see wifi.h).
 	ConnectToWiFiNetwork();
 }
 
@@ -134,9 +133,9 @@ void SendTCPWifiMessage(char *message, uint32_t size)
 	// Query the current status of the TCP connection.
 	StringToUsart6("AT+CIPSTATE?\r\n");
 	while (PopStringFromCircularBuffer(&circularBuffer, text) != READ_STRING_SUCCEEDED) // The code blocks here sometimes?!
-		; // Discard echo of "AT+CPISTART".
+		;																				// Discard echo of "AT+CPISTART".
 	while (PopStringFromCircularBuffer(&circularBuffer, text) != READ_STRING_SUCCEEDED) // The code blocks here sometimes?!
-		; // Retrieve response of "AT+CIPSTART".
+		;																				// Retrieve response of "AT+CIPSTART".
 	// If the response is not of the form "+CIPSTATE:0,"SSL","34.107.226.223",443,63455,0", restart.
 	if (text[0] != '+')
 	{

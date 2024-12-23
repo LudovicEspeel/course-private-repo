@@ -20,8 +20,6 @@
 
 // USER START (Optionally insert additional includes)
 #include "Board_LED.h"                  // ::Board Support:LED
-#include "tcpClient.h"
-#include "esp32c3.h"
 #include <string.h>
 #include "settings.h"
 // USER END
@@ -52,6 +50,12 @@
 */
 
 // USER START (Optionally insert additional static data)
+#ifdef WIFI
+extern uint8_t sendWifiData;
+#endif
+#ifdef ETHERNET
+extern uint8_t sendEthernetData;
+#endif
 // USER END
 
 /*********************************************************************
@@ -132,9 +136,7 @@ static void _cbDialog(WM_MESSAGE * pMsg) {
       case WM_NOTIFICATION_CLICKED:
         // USER START (Optionally insert code for reacting on notification message)
 			  #ifdef ETHERNET
-			  hItem = WM_GetDialogItem(pMsg->hWin, ID_BUTTON_0);
-			  char message[] = "Hello TCP/IP!";
-				SendTCPMessage(message, strlen(message));
+			  sendEthernetData = 1;
 			  #endif
         // USER END
         break;
@@ -151,9 +153,7 @@ static void _cbDialog(WM_MESSAGE * pMsg) {
       case WM_NOTIFICATION_CLICKED:
         // USER START (Optionally insert code for reacting on notification message)
 			  #ifdef WIFI
-				hItem = WM_GetDialogItem(pMsg->hWin, ID_BUTTON_1);
-				char message[] = "Hello Wifi TCP/IP!";
-				SendTCPWifiMessage(message, strlen(message)); //doesn't work well here. Response blocks?!
+			  sendWifiData = 1;
 			  #endif
         // USER END
         break;

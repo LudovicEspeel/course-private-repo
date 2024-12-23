@@ -2,7 +2,7 @@
 #define SETTINGS_DEFINED
 
 #define ETHERNET
-// #define WIFI
+//#define WIFI
 
 #define TIMER6
 

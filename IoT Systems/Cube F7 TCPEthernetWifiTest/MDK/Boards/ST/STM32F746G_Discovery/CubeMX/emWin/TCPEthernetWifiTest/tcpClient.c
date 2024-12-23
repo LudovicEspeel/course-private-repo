@@ -35,7 +35,7 @@ void OpenTCPConnection()
 			if (result < 0)
 			{
 				printf("Failed creating connection.\r\n");
-				closesocket(socket_fd);
+				CloseTCPConnection();
 			}
 		}
 	}

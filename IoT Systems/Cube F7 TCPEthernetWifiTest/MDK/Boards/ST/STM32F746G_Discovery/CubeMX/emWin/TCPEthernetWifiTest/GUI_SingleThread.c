@@ -14,14 +14,15 @@
 
 extern WM_HWIN CreateMyDialog(void);        // declared in MyDialogDLG.c
 extern int GUI_VNC_X_StartServer(int, int); // declared in MyDialogDLG.c
-extern uint8_t updateData;                  // declared in thread.c
 
 #ifdef ETHERNET
-extern char buffer[1024]; // declared in thread.c
+extern char buffer[1024];           // declared in thread.c
+extern uint8_t receivedEthernetData; // declared in thread.c
 #endif
 
 #ifdef WIFI
 extern char receivedText[CHAR_ARRAY_BUFFER_LENGTH]; // declared in thread.c
+extern uint8_t receivedWifiData;                    // declared in thread.c
 void removeBeforeColon(char *str);
 #endif
 
@@ -70,23 +71,22 @@ __NO_RETURN static void GUIThread(void *argument)
 
   while (1)
   {
-
     /* All GUI related activities might only be called from here */
 
 #ifdef ETHERNET
-    if (updateData == 1)
+    if (receivedEthernetData == 1)
     {
       TEXT_SetText(hItem, buffer);
-      updateData = 0;
+      receivedEthernetData = 0;
     }
 #endif
 
 #ifdef WIFI
-    if (updateData == 1)
+    if (receivedWifiData == 1)
     {
       // removeBeforeColon(receivedText); // remove +IPD,nr
       TEXT_SetText(hItem, &receivedText[8]);
-      updateData = 0;
+      receivedWifiData = 0;
     }
 #endif
 
