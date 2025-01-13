@@ -8,7 +8,6 @@ void doTest(const Matrix &matrixResult, const Matrix &matrixExpected);
 
 int main()
 {
-    {
     // Init matrix1 and 2:
     int m1[][3] = { {3, 8, 5}, {4, 6, 3}, {2, 5, -3} };
     int m2[][3] = { {7, 0, 8}, {4, -9, 6}, {1, 6, 4} };
@@ -51,8 +50,7 @@ int main()
     doTest(scalarMultiplicationResult1, scalarMultiplicationExpected1);
     doTest(scalarMultiplicationResult2, scalarMultiplicationExpected2);
     doTest(multiplicationResult, multiplicationExpected);
-    }
-  
+ 
     return 0;
 }
 
