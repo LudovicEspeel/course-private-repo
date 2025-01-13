@@ -4,7 +4,7 @@
 
 using namespace std;
 
-void doTest(Matrix &matrixResult, Matrix &matrixExpected);
+void doTest(const Matrix &matrixResult, const Matrix &matrixExpected);
 
 int main()
 {
@@ -56,7 +56,7 @@ int main()
     return 0;
 }
 
-void doTest(Matrix &matrixResult, Matrix &matrixExpected)
+void doTest(const Matrix &matrixResult, const Matrix &matrixExpected)
 {
     assert(matrixResult.getString() == matrixExpected.getString());
 }
