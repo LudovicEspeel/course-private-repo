@@ -79,6 +79,27 @@ void EXTI4_15_IRQHandler(void)
 	}	
 }
 
+/*
+Mogelijke oplossing als je teveel dender zou ervaren...
+Maak de globale variabele 'uint32_t lastInterruptTime' aan en plaats onderstaande code in de interrupt handler:
+
+//...
+
+uint32_t currentTime = ticks;
+if((currentTime - lastInterruptTime) > 200)
+{
+  //plaats hier jouw code: 
+  //if((EXTI->PR & EXTI_PR_PR...
+  //{
+  //...
+  //}
+
+  lastInterruptTime = currentTime;
+}
+
+//...
+*/
+
 // Handler die iedere 1ms afloopt. Ingesteld met SystemCoreClockUpdate() en SysTick_Config().
 void SysTick_Handler(void)
 {
