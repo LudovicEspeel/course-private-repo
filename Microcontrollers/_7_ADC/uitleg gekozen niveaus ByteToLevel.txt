@@ -1,0 +1,23 @@
+Waarom wordt er in ByteToLevel en ByteAsVUMeterMaximum grenzen 16 t.e.m. 240 genomen en niet van 0 t.e.m. 256?
+
+Reden: je wilt niet dat de LED1 al te snel brandt als de waarde 0 is.
+
+Met 8 LED's kan je 8 niveaus definiëren met stapgrootte van 32 (256 / 8 = 32):
+waarde >= 0 -->   LED1
+waarde >= 32 -->  LED2
+waarde >= 64 -->  LED3
+waarde >= 96 -->  LED4
+waarde >= 128 --> LED5
+waarde >= 160 --> LED6
+waarde >= 192 --> LED7
+waarde >= 224 --> LED8
+
+LED1 (en de andere LED's) mag iets later beginnen branden, we tellen bv. een offset van 16 bij:
+waarde >= 16 -->  LED1
+waarde >= 48 -->  LED2
+waarde >= 80 -->  LED3
+waarde >= 112 --> LED4
+waarde >= 144 --> LED5
+waarde >= 176 --> LED6
+waarde >= 208 --> LED7
+waarde >= 240 --> LED8

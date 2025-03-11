@@ -1,3 +1,11 @@
+// Basiscode voor het starten van eender welk project op een Nucleo-F091RC met Nucleo Extension Shield V2.
+//
+// OPM:
+//	- via 'Project -> Manage -> Select software packs' kies je bij Keil::STM32F0xx_DFP voor versie 2.0.0.
+//	- via 'Options for Target ...' zet je de compiler op C99 (en eventueel op AC5-like warnings).
+// 
+// Versie: 20242025
+
 // Includes.
 #include "stm32f091xc.h"
 #include "stdio.h"
@@ -16,9 +24,10 @@ void WaitForMs(uint32_t timespan);
 // OPM: het keyword 'static', zorgt ervoor dat de variabele enkel binnen dit bestand gebruikt kan worden.
 static uint8_t count = 0;
 static volatile uint32_t ticks = 0;
-bool buttonPressed = false;
-uint8_t leds = 0;
-uint32_t lastInterruptTime = 0;
+static uint16_t adValue = 0;
+
+// Maak een 'string van karakters' om een tekst in op te slaan.
+static char text[101];
 
 // Entry point.
 int main(void)
@@ -37,93 +46,28 @@ int main(void)
 	// Oneindige lus starten.
 	while (1)
 	{	
-		// Doe hier eens iets anders dan GPIO input in te lezen...
+		// Start de AD-omzetting. Sla het resultaat op in adValue.
+		adValue = GetAdValue();
+
+		// Stel een tekst op, met daarin de adValue verwerkt.
+		sprintf(text, "AD-waarde: %d.\r\n", adValue);
 		
-		if(buttonPressed)
-		{
-				ByteToLeds(leds);
-				StringToUsart2("Hoera, de knop werd ingedrukt via de interrupt!\r\n");
-			  buttonPressed = false;
-				leds = ~leds; 
-		}
+		// Verstuur de tekst naar de seriële poort.
+		StringToUsart2(text);
+		
+		// Waarde op de LED's zetten.
+		//...
+		
+		// Even wachten.
+		WaitForMs(500);
 	}
 }
 
 // Functie om extra IO's te initialiseren.
 void InitIo(void)
 {
-	// SYSCFG clock enable.  										
-	RCC->APB2ENR |= RCC_APB2ENR_SYSCFGEN;
-	
-	// PA4 (SW2) koppelen aan EXTI 4.
-	SYSCFG->EXTICR[1] |= SYSCFG_EXTICR2_EXTI4_PA;
-	
-	// Falling edge detecteren
-	EXTI->FTSR = EXTI->FTSR | EXTI_FTSR_TR4;
-	
-	// Interrupt toelaten
-	EXTI->IMR = EXTI->IMR | EXTI_IMR_MR4;
-	
-	// Eén van de 4 prioriteiten kiezen. Als er twee interrupts zijn met dezelfde
-	// prioriteit, wordt eerst diegene afgehandeld die de laagste 'position' heeft (zie vector table NVIC in datasheet).
-	NVIC_SetPriority(EXTI4_15_IRQn,0);
-	
-	// Interrupt effectief toelaten.
-	NVIC_EnableIRQ(EXTI4_15_IRQn);
-}
 
-// Interrupt handler aanmaken. De definities van de handler kan je vinden in
-// startup_stp32f091xc.s.
-void EXTI4_15_IRQHandler(void) 
-{	
-	// Als het een interrupt is van PA4, de LED's inschakelen.
-	if((EXTI->PR & EXTI_PR_PR4) == EXTI_PR_PR4)
-	{
-		// Interrupt (pending) vlag wissen door
-		// een 1 te schrijven: EXTI->PR |= EXTI_PR_PR4;
-		EXTI->PR |= EXTI_PR_PR4;
-		
-		// Eigenlijk is het afgeraden om periferie aan te sturen in interrupt handler!
-		
-		// LED inschakelen als bewijs van interrupt.
-		//ByteToLeds(255);
-		
-		//StringToUsart2("Hoera, de knop werd ingedrukt via de interrupt!\r\n");
-		
-		// Good practice: zet een globale variabele en controleer hierop in de main:
-		buttonPressed = true;
-	}
 }
-
-/*
-Mogelijke oplossing als je teveel dender zou ervaren...
-Maak de globale variabele 'uint32_t lastInterruptTime' aan en plaats onderstaande code in de interrupt handler:
-*/
-/*void EXTI4_15_IRQHandler(void) 
-{	
-	uint32_t currentTime = ticks;
-	if((currentTime - lastInterruptTime) > 10)
-	{
-			// Als het een interrupt is van PA4, de LED's inschakelen.
-			if((EXTI->PR & EXTI_PR_PR4) == EXTI_PR_PR4)
-			{
-				// Interrupt (pending) vlag wissen door
-				// een 1 te schrijven: EXTI->PR |= EXTI_PR_PR4;
-				EXTI->PR |= EXTI_PR_PR4;
-				
-				// Eigenlijk is het afgeraden om periferie aan te sturen in interrupt handler!
-				
-				// LED inschakelen als bewijs van interrupt.
-				//ByteToLeds(255);
-				
-				//StringToUsart2("Hoera, de knop werd ingedrukt via de interrupt!\r\n");
-				
-				// Good practice: zet een globale variabele en controleer hierop in de main:
-				buttonPressed = true;
-			}
-	}
-	lastInterruptTime = currentTime;
-}*/
 
 // Handler die iedere 1ms afloopt. Ingesteld met SystemCoreClockUpdate() en SysTick_Config().
 void SysTick_Handler(void)
