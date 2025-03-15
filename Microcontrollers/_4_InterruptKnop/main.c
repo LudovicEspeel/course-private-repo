@@ -29,7 +29,7 @@ int main(void)
 	InitButtons();
 	InitLeds();
 	InitUsart2(9600);
-	InitAd();
+	//InitAd();
 	
 	// Laten weten dat we opgestart zijn, via de USART2 (USB).
 	StringToUsart2("Reboot\r\n");
@@ -39,13 +39,15 @@ int main(void)
 	{	
 		// Doe hier eens iets anders dan GPIO input in te lezen...
 		
-		if(buttonPressed)
+		/*if(buttonPressed)
 		{
-				ByteToLeds(leds);
+		    ByteToLeds(255);
+		    //ByteToLeds(leds);
+				//leds = ~leds; 
+
 				StringToUsart2("Hoera, de knop werd ingedrukt via de interrupt!\r\n");
 			  buttonPressed = false;
-				leds = ~leds; 
-		}
+		}*/
 	}
 }
 
@@ -86,12 +88,12 @@ void EXTI4_15_IRQHandler(void)
 		// Eigenlijk is het afgeraden om periferie aan te sturen in interrupt handler!
 		
 		// LED inschakelen als bewijs van interrupt.
-		//ByteToLeds(255);
+		ByteToLeds(255);
 		
-		//StringToUsart2("Hoera, de knop werd ingedrukt via de interrupt!\r\n");
+		StringToUsart2("Hoera, de knop werd ingedrukt via de interrupt!\r\n");
 		
 		// Good practice: zet een globale variabele en controleer hierop in de main:
-		buttonPressed = true;
+		//buttonPressed = true;
 	}
 }
 
