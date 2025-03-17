@@ -80,11 +80,7 @@ void EXTI4_15_IRQHandler(void)
 {	
 	// Als het een interrupt is van PA4, de LED's inschakelen.
 	if((EXTI->PR & EXTI_PR_PR4) == EXTI_PR_PR4)
-	{
-		// Interrupt (pending) vlag wissen door
-		// een 1 te schrijven: EXTI->PR |= EXTI_PR_PR4;
-		EXTI->PR |= EXTI_PR_PR4;
-		
+	{	
 		// Eigenlijk is het afgeraden om periferie aan te sturen in interrupt handler!
 		
 		// LED inschakelen als bewijs van interrupt.
@@ -94,6 +90,10 @@ void EXTI4_15_IRQHandler(void)
 		
 		// Good practice: zet een globale variabele en controleer hierop in de main:
 		//buttonPressed = true;
+		
+		// Interrupt (pending) vlag wissen door
+		// een 1 te schrijven: EXTI->PR |= EXTI_PR_PR4;
+		EXTI->PR |= EXTI_PR_PR4;
 	}
 }
 
