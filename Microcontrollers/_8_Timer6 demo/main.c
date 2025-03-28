@@ -4,7 +4,7 @@
 //	- via 'Project -> Manage -> Select software packs' kies je bij Keil::STM32F0xx_DFP voor versie 2.0.0.
 //	- via 'Options for Target ...' zet je de compiler op C99 (en eventueel op AC5-like warnings).
 // 
-// Versie: 20220906
+// Versie: 20242025
 
 // Includes.
 #include "stm32f091xc.h"
