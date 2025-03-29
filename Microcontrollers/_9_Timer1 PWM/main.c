@@ -14,21 +14,18 @@
 #include "buttons.h"
 #include "usart2.h"
 #include "ad.h"
-#include "string.h"
-#include "persoon.h"
+#include "pwm.h"
 
 // Functie prototypes.
 void SystemClock_Config(void);
 void InitIo(void);
 void WaitForMs(uint32_t timespan);
-void PersoonToUsart(Persoon *persoon);
 
 // Variabelen aanmaken. 
 // OPM: het keyword 'static', zorgt ervoor dat de variabele enkel binnen dit bestand gebruikt kan worden.
 static uint8_t count = 0;
 static volatile uint32_t ticks = 0;
-static Persoon mezelf;
-	
+
 // Entry point.
 int main(void)
 {
@@ -39,38 +36,25 @@ int main(void)
 	InitLeds();
 	InitUsart2(9600);
 	InitAd();
+	InitPwm();
 	
 	// Laten weten dat we opgestart zijn, via de USART2 (USB).
 	StringToUsart2("Reboot\r\n");
 	
-	// Stel de eigenschappen van de Persoon-variabele in...
-	sprintf(mezelf.voornaam, "Ludovic");
-	sprintf(mezelf.achternaam, "Espeel");
-	mezelf.lengte = 1.84;
-	
-	//Persoon mezelf = { "Ludovic", "Espeel", 1.84 };
-	
 	// Oneindige lus starten.
 	while (1)
 	{	
-		// StringToUsart2(mezelf.achternaam);
-    // StringToUsart2("\r\n");
-		WaitForMs(1000);
+		if(SW1Active())
+			SetPwm(1000);
 		
-		// Geef het adres mee van waar 'mezelf' 
-		// opgeslagen is in het RAM.
-		PersoonToUsart(&mezelf);
+		if(SW2Active())
+			SetPwm(1500);
+		
+		if(SW3Active())
+			SetPwm(2000);
+		
+		WaitForMs(200);
 	}
-}
-
-// Schrijf een functie die een pointer verwacht
-// naar een variabele van het type Persoon.
-void PersoonToUsart(Persoon *persoon)
-{
-	StringToUsart2(persoon->voornaam);
-	StringToUsart2(" ");
-	StringToUsart2(persoon->achternaam);
-	StringToUsart2("\r\n");
 }
 
 // Functie om extra IO's te initialiseren.

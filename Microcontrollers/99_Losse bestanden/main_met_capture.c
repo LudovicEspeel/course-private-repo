@@ -14,69 +14,100 @@
 #include "buttons.h"
 #include "usart2.h"
 #include "ad.h"
-#include "string.h"
-#include "persoon.h"
+#include "capture.h"
 
 // Functie prototypes.
 void SystemClock_Config(void);
 void InitIo(void);
 void WaitForMs(uint32_t timespan);
-void PersoonToUsart(Persoon *persoon);
 
 // Variabelen aanmaken. 
 // OPM: het keyword 'static', zorgt ervoor dat de variabele enkel binnen dit bestand gebruikt kan worden.
-static uint8_t count = 0;
 static volatile uint32_t ticks = 0;
-static Persoon mezelf;
-	
+bool startNieuweMeting = true;
+bool toonResultaat = false;
+uint32_t startTijd = 0;
+uint32_t stopTijd = 0;
+
 // Entry point.
 int main(void)
 {
 	// Initialisaties.
 	SystemClock_Config();
 	InitIo();
-	InitButtons();
-	InitLeds();
+	//InitButtons();
+	//InitLeds();
 	InitUsart2(9600);
-	InitAd();
+	//InitAd();
+	InitCapture();
 	
 	// Laten weten dat we opgestart zijn, via de USART2 (USB).
 	StringToUsart2("Reboot\r\n");
 	
-	// Stel de eigenschappen van de Persoon-variabele in...
-	sprintf(mezelf.voornaam, "Ludovic");
-	sprintf(mezelf.achternaam, "Espeel");
-	mezelf.lengte = 1.84;
-	
-	//Persoon mezelf = { "Ludovic", "Espeel", 1.84 };
-	
 	// Oneindige lus starten.
 	while (1)
 	{	
-		// StringToUsart2(mezelf.achternaam);
-    // StringToUsart2("\r\n");
-		WaitForMs(1000);
+		if(startNieuweMeting)
+		{
+			// Trigger starten voor de HC-SR04
+			GPIOC->ODR |= GPIO_ODR_2; // Trigger op 1 zetten
+			WaitForMs(1);
+			GPIOC->ODR &= ~GPIO_ODR_2; // Trigger op 0 zetten
+			startNieuweMeting = false;
+		}
 		
-		// Geef het adres mee van waar 'mezelf' 
-		// opgeslagen is in het RAM.
-		PersoonToUsart(&mezelf);
-	}
-}
+		if(toonResultaat)
+		{
+			// Tijdsverschil berekenen
+      uint32_t tijdsduur = (stopTijd >= startTijd) ? (stopTijd - startTijd) : ((0xFFFF - startTijd) + stopTijd);
+			
+      // Berekening afstand
+      double tijdInSeconden = (double)tijdsduur / 1000000; // Omzetten van µs naar s
+      double afstandInCM = (tijdInSeconden * 340.0 * 100.0) / 2;
 
-// Schrijf een functie die een pointer verwacht
-// naar een variabele van het type Persoon.
-void PersoonToUsart(Persoon *persoon)
-{
-	StringToUsart2(persoon->voornaam);
-	StringToUsart2(" ");
-	StringToUsart2(persoon->achternaam);
-	StringToUsart2("\r\n");
+      // Output naar USART
+      char text[30];
+      sprintf(text, "Afstand: %.2f cm\r\n", afstandInCM);
+      StringToUsart2(text);
+			
+			toonResultaat = false;
+			startNieuweMeting = true;
+		}
+
+		WaitForMs(500);
+	}
 }
 
 // Functie om extra IO's te initialiseren.
 void InitIo(void)
 {
+	// Clock voor GPIOC inschakelen.
+	RCC->AHBENR = RCC->AHBENR | RCC_AHBENR_GPIOCEN;
+	
+	// PC2 (trigger) als output zetten
+	GPIOC->MODER = (GPIOC->MODER & ~GPIO_MODER_MODER2) | GPIO_MODER_MODER2_0;
+}
 
+void TIM3_IRQHandler(void) {
+
+	// Capture event voor Channel 3
+  if (TIM3->SR & TIM_SR_CC3IF) 
+	{ 
+		if ((TIM3->CCER & TIM_CCER_CC3P) == 0) 
+		{
+			startTijd = TIM3->CCR3;
+			TIM3->CCER |= TIM_CCER_CC3P; // Volgende capture op falling edge		
+    } 
+		else 
+		{
+			stopTijd = TIM3->CCR3;
+      TIM3->CCER &= ~TIM_CCER_CC3P; // Volgende capture op rising edge
+			toonResultaat = true;
+    }
+
+    // Interrupt vlag resetten
+    TIM3->SR &= ~TIM_SR_CC3IF;
+  }
 }
 
 // Handler die iedere 1ms afloopt. Ingesteld met SystemCoreClockUpdate() en SysTick_Config().

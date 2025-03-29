@@ -1,4 +1,5 @@
 #include "stm32f091xc.h"
+#include "pwm.h"
 
 void InitPwm(void)
 {
@@ -20,7 +21,7 @@ void InitPwm(void)
 	TIM1->ARR = 20000; 											// Periode van 20 ms want: 1µs * 20000 = 20ms of  = 1/48000000 * 48 * 20000 = 20ms
 	pwm = 1000;															// Gewenste PWM-waarde (1000 <= pwm <= 2000). Want modelbouw-ESC verwacht minstens 1ms en maximum 2ms.
 	TIM1->CCR1 = pwm; 											// Aantijd voor OC1 (Output Compare)
-	TIM1->CCR2 = pwm; 											// aantijd voor OC2
+	TIM1->CCR2 = pwm; 											// Aantijd voor OC2
 	TIM1->CCMR1 |= TIM_CCMR1_OC1M_2 | TIM_CCMR1_OC1M_1 | TIM_CCMR1_OC1PE; 	// PWM mode 1 op OC1/PA8, enable preload register op OC1 (OC1PE = 1)
 	TIM1->CCMR1 |= TIM_CCMR1_OC2M_2 | TIM_CCMR1_OC2M_1 | TIM_CCMR1_OC2PE; 	// PWM mode 1 op OC2/PA9, enable preload register op OC2 (OC2PE = 1)
 	TIM1->CCER |= TIM_CCER_CC1E | TIM_CCER_CC2E; 														// Enable OC1 (en OC2) output.
@@ -33,7 +34,7 @@ void InitPwm(void)
 void SetPwm(uint16_t pPwm)
 {
 	TIM1->CCR1 = pPwm; 										// Aantijd voor OC1
-	TIM1->CCR2 = pPwm; 										// aantijd voor OC2
+	TIM1->CCR2 = pPwm; 										// Aantijd voor OC2
 	//TIM1->EGR |= TIM_EGR_UG; 							// Force update generation (UG = 1).
 }
 
