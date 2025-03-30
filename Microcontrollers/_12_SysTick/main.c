@@ -2,7 +2,7 @@
 //
 // OPM:
 //	- via 'Project -> Manage -> Select software packs' kies je bij Keil::STM32F0xx_DFP voor versie 2.0.0.
-//	- via 'Options for Target ...' zet je de compiler op C99 (en eventueel op AC5-like warnings).
+//	- via 'Options for Target -> C/C++' zet je de compiler op C11, optimizations op default en warnings op AC5-like.
 // 
 // Versie: 20242025
 
@@ -24,10 +24,6 @@ void WaitForMs(uint32_t timespan);
 // OPM: het keyword 'static', zorgt ervoor dat de variabele enkel binnen dit bestand gebruikt kan worden.
 static uint8_t count = 0;
 static volatile uint32_t ticks = 0;
-static uint16_t adValue = 0;
-
-// Maak een 'string van karakters' om een tekst in op te slaan.
-static char text[101];
 
 // Entry point.
 int main(void)
@@ -46,21 +42,11 @@ int main(void)
 	// Oneindige lus starten.
 	while (1)
 	{	
-		// Start de AD-omzetting. Sla het resultaat op in adValue.
-		adValue = GetAdValue();
 
-		// Stel een tekst op, met daarin de adValue verwerkt.
-		sprintf(text, "AD-waarde: %d\r\n", adValue);
-		
-		// Verstuur de tekst naar de seriële poort.
-		StringToUsart2(text);
-		
-		// Waarde op de LED's zetten.
-		//...
-		
-		// Even wachten.
-		WaitForMs(500);
 	}
+	
+	// Terugkeren zonder fouten... (unreachable).
+	return 0;
 }
 
 // Functie om extra IO's te initialiseren.
@@ -69,10 +55,12 @@ void InitIo(void)
 
 }
 
-// Handler die iedere 1ms afloopt. Ingesteld met SystemCoreClockUpdate() en SysTick_Config().
+// Handler die iedere 20 ms afloopt. 
+// Ingesteld met SystemCoreClockUpdate() en SysTick_Config().
 void SysTick_Handler(void)
 {
 	ticks++;
+	ToggleLed(1);
 }
 
 // Wachtfunctie via de SysTick.
@@ -111,7 +99,12 @@ void SystemClock_Config(void)
 	RCC->CFGR |= RCC_CFGR_HPRE_DIV1;												// SYSCLK niet meer delen, dus HCLK = 48MHz
 	RCC->CFGR |= RCC_CFGR_PPRE_DIV1;												// HCLK niet meer delen, dus PCLK = 48MHz	
 	
-	SystemCoreClockUpdate();																// Nieuwe waarde van de core frequentie opslaan in SystemCoreClock variabele
-	SysTick_Config(48000);																	// Interrupt genereren. Zie core_cm0.h, om na ieder 1ms een interrupt 
-																													// te hebben op SysTick_Handler()
+	SystemCoreClockUpdate(); // Nieuwe waarde van de core frequentie opslaan 
+													 // in SystemCoreClock variabele.
+													 
+	SysTick_Config(960000);	 // Interrupt genereren. Zie core_cm0.h, om na iedere
+													 // 20 ms een interrupt te hebben op SysTick_Handler().
+													 // 48 000 000 / 960 000 = 50 keer per seconde => 20 ms.
+													 // Let op: SysTick is 24-bit breed, dus maximumwaarde
+													 //	is 16 777 215.
 }

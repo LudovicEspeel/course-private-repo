@@ -2,7 +2,7 @@
 //
 // OPM:
 //	- via 'Project -> Manage -> Select software packs' kies je bij Keil::STM32F0xx_DFP voor versie 2.0.0.
-//	- via 'Options for Target ...' zet je de compiler op C99 (en eventueel op AC5-like warnings).
+//	- via 'Options for Target -> C/C++' zet je de compiler op C11, optimizations op default en warnings op AC5-like.
 // 
 // Versie: 20242025
 
@@ -14,20 +14,22 @@
 #include "buttons.h"
 #include "usart2.h"
 #include "ad.h"
+#include "string.h"
 
 // Functie prototypes.
 void SystemClock_Config(void);
 void InitIo(void);
 void WaitForMs(uint32_t timespan);
+void DoSomeStuff();
 
 // Variabelen aanmaken. 
 // OPM: het keyword 'static', zorgt ervoor dat de variabele enkel binnen dit bestand gebruikt kan worden.
-static uint8_t count = 0;
 static volatile uint32_t ticks = 0;
-static uint16_t adValue = 0;
-
-// Maak een 'string van karakters' om een tekst in op te slaan.
-static char text[101];
+static uint32_t startTijd = 0;
+static uint32_t eindTijd = 0;
+static uint32_t tijdsduur = 0;
+static float tijdsduurMs = 0;
+static char info[100];
 
 // Entry point.
 int main(void)
@@ -35,10 +37,10 @@ int main(void)
 	// Initialisaties.
 	SystemClock_Config();
 	InitIo();
-	InitButtons();
-	InitLeds();
+	//InitButtons();
+	//InitLeds();
 	InitUsart2(9600);
-	InitAd();
+	//InitAd();
 	
 	// Laten weten dat we opgestart zijn, via de USART2 (USB).
 	StringToUsart2("Reboot\r\n");
@@ -46,30 +48,77 @@ int main(void)
 	// Oneindige lus starten.
 	while (1)
 	{	
-		// Start de AD-omzetting. Sla het resultaat op in adValue.
-		adValue = GetAdValue();
+		// ...
+		// Opmeten
+		
+		// Begintijd vaststellen
+		startTijd = SysTick->VAL;
+		
+		// Beetje uitrusten
+		DoSomeStuff();
 
-		// Stel een tekst op, met daarin de adValue verwerkt.
-		sprintf(text, "AD-waarde: %d\r\n", adValue);
+		// Eindtijd vaststellen
+		eindTijd = SysTick->VAL;
+
+		// Controleren of er geen underflow/roll over geweest is (onder nul gezakt).
+		if ((SysTick->CTRL & 0x10000) == 0)
+		{
+				tijdsduur = startTijd - eindTijd;
+				tijdsduurMs = (float)tijdsduur / 48;
+				sprintf(info, "\r\nDe opgemeten tijdsduur van 'DoSomeStuff()' is: %d klokcycli.", tijdsduur);
+				StringToUsart2(info);
+				sprintf(info, "\r\nDit staat gelijk met: %.2f microseconden.", tijdsduurMs);
+				StringToUsart2(info);
+		}
+		else
+		{
+				tijdsduur = 0;
+				sprintf(info, "\r\nDe opgemeten tijdsduur van 'DoSomeStuff()' is onbekend (SysTick underflow).");
+				StringToUsart2(info);
+		}
+		// ...
 		
-		// Verstuur de tekst naar de seriële poort.
-		StringToUsart2(text);
-		
-		// Waarde op de LED's zetten.
-		//...
-		
-		// Even wachten.
-		WaitForMs(500);
+		WaitForMs(200);
 	}
+	
+	// Terugkeren zonder fouten... (unreachable).
+	return 0;
 }
 
 // Functie om extra IO's te initialiseren.
 void InitIo(void)
 {
+	// Initialisatie
+	
+	// SysTick uitschakelen
+	SysTick->CTRL = 0;
 
+	// 24-bit 'reload' getal op maximum zetten zodat we
+	// aftellen van maximumwaarde na bereiken van 0.
+	SysTick->LOAD = 0xFFFFFF;
+
+	// Huidige waarde op nul zetten zodat straks onmiddellijk
+	// gereset wordt op 0xFFFFFF.
+	SysTick->VAL = 0;
+
+	// HCLK selecteren en SysTick Timer enable (geen interrupt toelaten).
+	SysTick->CTRL = SysTick_CTRL_CLKSOURCE_Msk | SysTick_CTRL_ENABLE_Msk;
+
+	// Wachten om herladen van de teller (met 0xFFFFFF)
+	while (SysTick->VAL == 0);
 }
 
-// Handler die iedere 1ms afloopt. Ingesteld met SystemCoreClockUpdate() en SysTick_Config().
+void DoSomeStuff()
+{
+	// Enkele "zware" berekeningen ...
+	for(uint32_t counter = 0; counter < 20000; counter++)
+	{
+		__NOP();
+	}
+}
+
+// Handler die iedere 20 ms afloopt. 
+// Ingesteld met SystemCoreClockUpdate() en SysTick_Config().
 void SysTick_Handler(void)
 {
 	ticks++;
@@ -111,7 +160,12 @@ void SystemClock_Config(void)
 	RCC->CFGR |= RCC_CFGR_HPRE_DIV1;												// SYSCLK niet meer delen, dus HCLK = 48MHz
 	RCC->CFGR |= RCC_CFGR_PPRE_DIV1;												// HCLK niet meer delen, dus PCLK = 48MHz	
 	
-	SystemCoreClockUpdate();																// Nieuwe waarde van de core frequentie opslaan in SystemCoreClock variabele
-	SysTick_Config(48000);																	// Interrupt genereren. Zie core_cm0.h, om na ieder 1ms een interrupt 
-																													// te hebben op SysTick_Handler()
+	SystemCoreClockUpdate(); // Nieuwe waarde van de core frequentie opslaan 
+													 // in SystemCoreClock variabele.
+													 
+	SysTick_Config(960000);	 // Interrupt genereren. Zie core_cm0.h, om na iedere
+													 // 20 ms een interrupt te hebben op SysTick_Handler().
+													 // 48 000 000 / 960 000 = 50 keer per seconde => 20 ms.
+													 // Let op: SysTick is 24-bit breed, dus maximumwaarde
+													 //	is 16 777 215.
 }
