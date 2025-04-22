@@ -48,7 +48,13 @@ int main(void)
 	sprintf(mezelf.achternaam, "Espeel");
 	mezelf.lengte = 1.84;
 	
+	// Attributen worden opgevuld in volgorde (voornaam, achternaam en lengte):
 	//Persoon mezelf = { "Ludovic", "Espeel", 1.84 };
+	
+	// Attributen worden opgevuld volgens opgegeven attribuutnaam,
+	// de volgorde speelt geen rol meer:
+	//Persoon mezelf = { .achternaam = "Espeel", .voornaam = "Ludovic", .lengte = 1.84 };
+	
 	
 	// Oneindige lus starten.
 	while (1)
