@@ -117,17 +117,18 @@ void InitIo(void)
 	// Clock voor GPIOC inschakelen
 	RCC->AHBENR |= RCC_AHBENR_GPIOCEN;
     
-  GPIOC->MODER |= (1U << (0 * 2)) | (1U << (2 * 2)); // PC0, PC2 as output
-  GPIOC->MODER &= ~(3U << (3 * 2)); // PC3 as input
+	// PC2 als output instellen (trigger)
+	GPIOC->MODER &= ~GPIO_MODER_MODER2;
+	GPIOC->MODER |= GPIO_MODER_MODER2_0;
 
-  // PC8 als input instellen
+  // PC8 als input instellen (echo)
   GPIOC->MODER &= ~GPIO_MODER_MODER8;
     
   // SYSCFG clock inschakelen
   RCC->APB2ENR |= RCC_APB2ENR_SYSCFGEN;
     
   // PC8 koppelen aan EXTI8
-  SYSCFG->EXTICR[2] |= SYSCFG_EXTICR3_EXTI8_PC;  // EXTI8 ? PC8
+  SYSCFG->EXTICR[2] |= SYSCFG_EXTICR3_EXTI8_PC;  // EXTI8 -> PC8
     
   // Interrupt op zowel rising als falling edge instellen
   EXTI->RTSR |= EXTI_RTSR_TR8;  // Rising edge detectie
