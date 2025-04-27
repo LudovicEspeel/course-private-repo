@@ -12,7 +12,7 @@ void InitPwm(void)
 	GPIOA->MODER = (GPIOA->MODER & ~GPIO_MODER_MODER8) | GPIO_MODER_MODER8_1;		// Alternate function op PA8
 	GPIOA->AFR[1] |= 0x00000002;		// Alternate function 2
 	
-	// PA9/modelbouw ESC moet TIM1_CH2 worden via alternate function 2
+	// PA9/modelbouwservo moet TIM1_CH2 worden via alternate function 2
 	GPIOA->MODER = (GPIOA->MODER & ~GPIO_MODER_MODER9) | GPIO_MODER_MODER9_1;		// Alternate function op PA9
 	GPIOA->AFR[1] |= 0x00000020;		// Alternate function 2
 	
@@ -20,8 +20,8 @@ void InitPwm(void)
 	TIM1->PSC = 47; 												// Prescaler op 1/48 => 48000000/48 => 1 µs per puls
 	TIM1->ARR = 20000; 											// Periode van 20 ms want: 1µs * 20000 = 20ms of  = 1/48000000 * 48 * 20000 = 20ms
 	pwm = 1000;															// Gewenste PWM-waarde (1000 <= pwm <= 2000). Want modelbouw-ESC verwacht minstens 1ms en maximum 2ms.
-	TIM1->CCR1 = pwm; 											// Aantijd voor OC1 (Output Compare)
-	TIM1->CCR2 = pwm; 											// Aantijd voor OC2
+	TIM1->CCR1 = pwm; 											// Aantijd voor OC1 (Output Compare) voor CH1: PA8
+	TIM1->CCR2 = pwm; 											// Aantijd voor OC2 voor CH2: PA9
 	TIM1->CCMR1 |= TIM_CCMR1_OC1M_2 | TIM_CCMR1_OC1M_1 | TIM_CCMR1_OC1PE; 	// PWM mode 1 op OC1/PA8, enable preload register op OC1 (OC1PE = 1)
 	TIM1->CCMR1 |= TIM_CCMR1_OC2M_2 | TIM_CCMR1_OC2M_1 | TIM_CCMR1_OC2PE; 	// PWM mode 1 op OC2/PA9, enable preload register op OC2 (OC2PE = 1)
 	TIM1->CCER |= TIM_CCER_CC1E | TIM_CCER_CC2E; 														// Enable OC1 (en OC2) output.
@@ -44,7 +44,7 @@ void SetPwm(uint16_t pPwm)
 //	GPIOA->MODER = (GPIOA->MODER & ~GPIO_MODER_MODER8) | GPIO_MODER_MODER8_1;		// Alternate function op PA8
 //	GPIOA->AFR[1] |= 0x00000002;		// Alternate function 2
 //	
-//	// PA9/modelbouw ESC moet TIM1_CH2 worden via alternate function 2
+//	// PA9/modelbouwservo moet TIM1_CH2 worden via alternate function 2
 //	GPIOA->MODER = (GPIOA->MODER & ~GPIO_MODER_MODER9) | GPIO_MODER_MODER9_1;		// Alternate function op PA9
 //	GPIOA->AFR[1] |= 0x00000020;		// Alternate function 2
 //	
@@ -54,7 +54,7 @@ void SetPwm(uint16_t pPwm)
 
 //void DisablePWM(void)
 //{
-//	// Disnable output (MOE = 0).
+//	// Disable output (MOE = 0).
 //	TIM1->BDTR &= ~TIM_BDTR_MOE; 																					
 //	
 //	// PA8/LED6 als (laag ohmige) output zetten om storing bij aanraking pin te voorkomen.
