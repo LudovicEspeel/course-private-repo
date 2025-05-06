@@ -17,7 +17,7 @@ void InitCapture(void)
 
   // Input capture op Channel 3
   TIM3->CCMR2 |= TIM_CCMR2_CC3S_0; // CC1 als input
-  TIM3->CCER |= TIM_CCER_CC3P; // Capture op neergaande flank
+  TIM3->CCER &= ~TIM_CCER_CC3P; // Capture op rising edge
   TIM3->CCER |= TIM_CCER_CC3E; // Capture enable
     
   // Interrupt inschakelen

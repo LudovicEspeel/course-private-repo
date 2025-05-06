@@ -28,7 +28,7 @@ static volatile uint32_t ticks = 0;
 static uint32_t startTijd = 0;
 static uint32_t eindTijd = 0;
 static uint32_t tijdsduur = 0;
-static float tijdsduurMs = 0;
+static float tijdsduurUs = 0; // microseconden
 static char info[100];
 
 // Entry point.
@@ -64,10 +64,10 @@ int main(void)
 		if ((SysTick->CTRL & 0x10000) == 0)
 		{
 				tijdsduur = startTijd - eindTijd;
-				tijdsduurMs = (float)tijdsduur / 48;
+				tijdsduurUs = (float)tijdsduur / 48;
 				sprintf(info, "\r\nDe opgemeten tijdsduur van 'DoSomeStuff()' is: %d klokcycli.", tijdsduur);
 				StringToUsart2(info);
-				sprintf(info, "\r\nDit staat gelijk met: %.2f microseconden.", tijdsduurMs);
+				sprintf(info, "\r\nDit staat gelijk met: %.2f microseconden.", tijdsduurUs);
 				StringToUsart2(info);
 		}
 		else

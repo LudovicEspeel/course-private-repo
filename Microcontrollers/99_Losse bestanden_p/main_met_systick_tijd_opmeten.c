@@ -45,41 +45,43 @@ int main(void)
 	// Laten weten dat we opgestart zijn, via de USART2 (USB).
 	StringToUsart2("Reboot\r\n");
 	
-	// ...
-	// Opmeten
-		
-	// Begintijd vaststellen
-	startTijd = SysTick->VAL;
-		
-	// Beetje uitrusten
-	DoSomeStuff();
-
-	// Eindtijd vaststellen
-	eindTijd = SysTick->VAL;
-
-	// Controleren of er geen underflow/roll over geweest is (onder nul gezakt).
-	if ((SysTick->CTRL & 0x10000) == 0)
-	{
-		tijdsduur = startTijd - eindTijd;
-		tijdsduurMs = (float)tijdsduur / 48;
-		sprintf(info, "\r\nDe opgemeten tijdsduur van 'DoSomeStuff()' is: %d klokcycli.", tijdsduur);
-		StringToUsart2(info);
-		sprintf(info, "\r\nDit staat gelijk met: %.2f microseconden.", tijdsduurMs);
-		StringToUsart2(info);
-	}
-	else
-	{
-		tijdsduur = 0;
-		sprintf(info, "\r\nDe opgemeten tijdsduur van 'DoSomeStuff()' is onbekend (SysTick underflow).");
-		StringToUsart2(info);
-	}
-	// ...
-	
 	// Oneindige lus starten.
 	while (1)
 	{	
+		// ...
+		// Opmeten
+		
+		// Begintijd vaststellen
+		startTijd = SysTick->VAL;
+		
+		// Beetje uitrusten
+		DoSomeStuff();
+
+		// Eindtijd vaststellen
+		eindTijd = SysTick->VAL;
+
+		// Controleren of er geen underflow/roll over geweest is (onder nul gezakt).
+		if ((SysTick->CTRL & 0x10000) == 0)
+		{
+				tijdsduur = startTijd - eindTijd;
+				tijdsduurMs = (float)tijdsduur / 48;
+				sprintf(info, "\r\nDe opgemeten tijdsduur van 'DoSomeStuff()' is: %d klokcycli.", tijdsduur);
+				StringToUsart2(info);
+				sprintf(info, "\r\nDit staat gelijk met: %.2f microseconden.", tijdsduurMs);
+				StringToUsart2(info);
+		}
+		else
+		{
+				tijdsduur = 0;
+				sprintf(info, "\r\nDe opgemeten tijdsduur van 'DoSomeStuff()' is onbekend (SysTick underflow).");
+				StringToUsart2(info);
+		}
+		// ...
+		
+		WaitForMs(200);
 	}
 	
+	// Terugkeren zonder fouten... (unreachable).
 	return 0;
 }
 
@@ -119,7 +121,7 @@ void DoSomeStuff()
 // Ingesteld met SystemCoreClockUpdate() en SysTick_Config().
 void SysTick_Handler(void)
 {
-	ticks++; // Handler wordt nu niet gebruikt, in regel 104 is interrupt uitgeschakeld.
+	ticks++;
 }
 
 // Wachtfunctie via de SysTick.
