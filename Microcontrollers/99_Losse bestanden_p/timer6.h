@@ -1,3 +1,5 @@
+#include "stm32f091xc.h"
+
 #if !defined(TIMER6_DEFINED)
 	#define TIMER6_DEFINED
 	
