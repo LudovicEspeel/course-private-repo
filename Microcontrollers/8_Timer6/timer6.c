@@ -7,8 +7,9 @@ void InitTimer6(void)
 	
 	TIM6->PSC = 47999;									// Als je een klok wil op 1000 Hz:
 																			// 48 000 000 / (47 999 + 1) = 1000 Hz
-	TIM6->ARR = 125;										// Als je iedere 125 ms een interrupt wil... 
-																			// 125 stappen van 1 ms.		
+	TIM6->ARR = 125 - 1;								// Als je iedere 125 ms een interrupt wil:
+																			// 125 stappen van 1 ms.
+																			// (125 - 1 want timer telt van 0 t.e.m. 124).
 	
 	TIM6->DIER |= TIM_DIER_UIE;					// Interrupt enable voor timer 6	
 	TIM6->CR1 |= TIM_CR1_CEN;						// counter enable

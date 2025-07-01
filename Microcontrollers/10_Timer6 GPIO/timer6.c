@@ -7,7 +7,7 @@
 void InitTimer6(void)
 {
 	RCC->APB1ENR |= RCC_APB1ENR_TIM6EN; // Timer6 clock aanzetten
-  TIM6->PSC = 48 - 1; // Prescaler: Deel door 48000 (1 tick = 1 ms)
+  TIM6->PSC = 48 - 1; // Prescaler: 48MHz / (47+1) = 1MHz (1 µs resolutie)
   TIM6->ARR = 0xFFFF; // Auto-reload: 1000 ticks = 1 seconde
   //TIM6->CR1 |= TIM_CR1_URS; // Enkel overflow genereert update event
   //TIM6->EGR |= TIM_EGR_UG; // Update event forceren om registers te laden

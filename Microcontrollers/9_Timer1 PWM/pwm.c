@@ -17,8 +17,8 @@ void InitPwm(void)
 	GPIOA->AFR[1] |= 0x00000020;		// Alternate function 2
 	
 	RCC->APB2ENR |= RCC_APB2ENR_TIM1EN;			// Clock voorzien voor de timer1.	
-	TIM1->PSC = 47; 												// Prescaler op 1/48 => 48000000/48 => 1 탎 per puls
-	TIM1->ARR = 20000; 											// Periode van 20 ms want: 1탎 * 20000 = 20ms of  = 1/48000000 * 48 * 20000 = 20ms
+	TIM1->PSC = 47; 												// Prescaler op 1/(47+1) => 48000000/48 => 1 탎 per puls
+	TIM1->ARR = 20000 - 1; 									// Periode van 20 ms want: 1탎 * 20000 = 20ms of  = 1/48000000 * 48 * 20000 = 20ms
 	pwm = 1000;															// Gewenste PWM-waarde (1000 <= pwm <= 2000). Want modelbouw-ESC verwacht minstens 1ms en maximum 2ms.
 	TIM1->CCR1 = pwm; 											// Aantijd voor OC1 (Output Compare) voor CH1: PA8
 	TIM1->CCR2 = pwm; 											// Aantijd voor OC2 voor CH2: PA9
